@@ -190,7 +190,6 @@ class H2RepositorySpec extends AbstractRepositorySpec implements H2TestPropertyP
         then:
         a5.id
 
-
         when:
         a5 = carRepo.findById(a5.id).orElse(null)
 
@@ -199,24 +198,24 @@ class H2RepositorySpec extends AbstractRepositorySpec implements H2TestPropertyP
         a5.name == 'A5'
         carRepo.getById(a5.id).parts.size() == 0
 
-        when:"an update happens"
+        when: "an update happens"
         carRepo.update(a5.id, "A6")
         a5 = carRepo.findById(a5.id).orElse(null)
 
-        then:"the updated worked"
+        then: "the updated worked"
         a5.name == 'A6'
 
-        when:"an update to null happens"
-            carRepo.update(a5.id, null)
-            a5 = carRepo.findById(a5.id).orElse(null)
+        when: "an update to null happens"
+        carRepo.update(a5.id, null)
+        a5 = carRepo.findById(a5.id).orElse(null)
 
-        then:"the updated to null worked"
-            a5.name == null
+        then: "the updated to null worked"
+        a5.name == null
 
-        when:"A deleted"
+        when: "A deleted"
         carRepo.deleteById(a5.id)
 
-        then:"It was deleted"
+        then: "It was deleted"
         !carRepo.findById(a5.id).isPresent()
 
         cleanup:
@@ -234,8 +233,8 @@ class H2RepositorySpec extends AbstractRepositorySpec implements H2TestPropertyP
         author != null
         author.name == "Stephen King"
         author.books.size() == 2
-        author.books.find { it.title == "The Stand"}
-        author.books.find { it.title == "Pet Cemetery"}
+        author.books.find { it.title == "The Stand" }
+        author.books.find { it.title == "Pet Cemetery" }
 
         cleanup:
         cleanupData()
@@ -245,27 +244,47 @@ class H2RepositorySpec extends AbstractRepositorySpec implements H2TestPropertyP
         given:
         saveSampleBooks()
 
-        when:"using a function that maps a single value"
+        when: "using a function that maps a single value"
         def book = ar.testReadSingleProperty("The Stand", 700)
 
-        then:"The result is correct"
+        then: "The result is correct"
         book != null
         book.author.name == 'Stephen King'
 
-        when:"using a function that maps an associated entity value"
+        when: "using a function that maps an associated entity value"
         book = ar.testReadAssociatedEntity("The Stand", 700)
 
-        then:"The result is correct"
+        then: "The result is correct"
         book != null
         book.author.name == 'Stephen King'
         book.author.id
 
-        when:"using a function that maps a DTO"
+        when: "using a function that maps a DTO"
         book = ar.testReadDTO("The Stand", 700)
 
-        then:"The result is correct"
+        then: "The result is correct"
         book != null
         book.author.name == 'Stephen King'
+
+        then:
+        cleanupData()
+    }
+
+    void "test In Native Query function"() {
+        given:
+        savePersons(["Cemo", "Deniz", "Utku"])
+
+        when: "using a function that maps a single value"
+        //pr.findByNameIn(List<String>.of("Cemo", "Utku", "Deniz", "Olcay"));
+
+        //pr.queryNames2("utku","deniz")
+
+        def persons = pr.queryNames(List<String>.of("Cemo", "Utku", "Deniz", "Olcay"),
+                "Utku", List<Long>.of(1L, 3L, 100L))
+
+        then: "The result is correct"
+        persons != null
+        persons.size() == 1
 
         then:
         cleanupData()

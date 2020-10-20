@@ -58,6 +58,14 @@ public interface PersonRepository extends CrudRepository<Person, Long>, Pageable
     @Query("UPDATE person SET name = 'test' WHERE id = :id")
     long updatePersonCustom(Long id);
 
+    @Query(value = "SELECT * FROM person WHERE name in (:names) and id in (:ids) and name != :name and id in (:ids) and name != :name")
+    List<Person> queryNames(List<String> names, String name, List<Long> ids);
+
+    @Query(value = "SELECT * FROM person WHERE name != :name1 and name != :name2 and name != :name1")
+    List<Person> queryNames2(String name1, String name2);
+
+    List<Person> findByNameIn(List<String> names);
+
     CompletableFuture<Long> updatePersonFuture(@Id Long id, @Parameter("name") String name);
 
     long updateByName(String name, int age);
